@@ -1,0 +1,33 @@
+name: Build-Debug
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  build-rust:
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: Cysharp/Actions/.github/actions/checkout@main
+      - run: cargo build --verbose
+      - run: cargo test update_package_version -- 1.0.0 --nocapture
+      - run: cargo test
+
+  build-dotnet:
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: Cysharp/Actions/.github/actions/checkout@main
+      - uses: Cysharp/Actions/.github/actions/setup-dotnet@main
+      - run: dotnet build -c Release
+      - run: dotnet pack -c Release --no-build -p:IncludeSymbols=true -o $GITHUB_WORKSPACE/artifacts
